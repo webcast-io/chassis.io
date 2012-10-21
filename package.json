@@ -13,7 +13,7 @@
   "author": "Paul Jensen <paul.jensen@axisto.com>",
   "license": "MIT",
   "dependencies":{
-    "engine.io":"0.3.5",
+    "engine.io":"0.3.7",
     "redis":"0.8.1"
   },
   "devDependencies":{
