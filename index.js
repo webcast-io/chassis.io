@@ -1,5 +1,6 @@
 // Dependencies
 var engine          = require('engine.io')
+  , eventHandler    = require('./lib/eventHandler')
   , message         = require('./lib/message')
   , pool            = require('./lib/pool')
   , pubsub          = require('./lib/pubsub/redis');
@@ -14,16 +15,19 @@ var attach = function(server, cb) {
     socketServer.on('connection', function (socket) {
 
       socket.on('message', function(rocket){
-        message.decode(rocket, function(err, unpackedRocket){
-          switch(unpackedRocket.action) {
-            case 'subscribe': 
-              pubsub.subscribe(unpackedRocket.channel, socket.id);
+        message.decode(rocket, function(err, cargo){
+          switch(cargo.action) {
+            case 'subscribe':
+              eventHandler.emit('subscribe', cargo.channel, socket.id);
+              pubsub.subscribe(cargo.channel, socket.id);
               break;
             case 'unsubscribe':
-              pubsub.unsubscribe(unpackedRocket.channel, socket.id);
+              eventHandler.emit('unsubscribe', cargo.channel, socket.id);
+              pubsub.unsubscribe(cargo.channel, socket.id);
               break;
             case 'publish':
-              pubsub.publish(unpackedRocket.channel, unpackedRocket.data);
+              eventHandler.emit('publish', cargo.channel, cargo.data);            
+              pubsub.publish(cargo.channel, cargo.data);
               break;
           }
         });
@@ -44,6 +48,7 @@ var attach = function(server, cb) {
 module.exports = {
     attach          : attach
   , engine          : engine
+  , eventHandler    : eventHandler
   , message         : message
   , pool            : pool  
   , pubsub          : pubsub
