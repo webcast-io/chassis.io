@@ -1,7 +1,6 @@
 TODO
 ===
 
-- When a socket successfully reconnects, make it subscribe to channels it was subscribed to before it cut out.
 - When a socket closes from the client, remove the socket from all channels.
 
 - Provide an easy way to bind to client-side pubsub events in an event-emitter style.
