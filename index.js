@@ -18,16 +18,16 @@ var attach = function(server, cb) {
         message.decode(rocket, function(err, cargo){
           switch(cargo.action) {
             case 'subscribe':
-              eventHandler.emit('subscribe', cargo.channel, socket.id);
+              eventHandler.emit('subscribe', cargo.channel, socket.id, cargo.data);
               pubsub.subscribe(cargo.channel, socket.id);
               break;
             case 'unsubscribe':
-              eventHandler.emit('unsubscribe', cargo.channel, socket.id);
+              eventHandler.emit('unsubscribe', cargo.channel, socket.id, cargo.data);
               pubsub.unsubscribe(cargo.channel, socket.id);
               break;
             case 'publish':
-              eventHandler.emit('publish', cargo.channel, cargo.data);            
-              pubsub.publish(cargo.channel, cargo.data);
+              eventHandler.emit('publish', cargo.channel, socket.id, cargo.data);            
+              pubsub.publish(cargo.channel, socket.id, cargo.data);
               break;
           }
         });
