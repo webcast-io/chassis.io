@@ -44,6 +44,30 @@ describe("Pool", function(){
       });
     });
 
+    // Note - this is more of a functional test
+    it("should remove the socket from all of the channels that it is subscribed to", function(done){
+      // we need a channel, a socket, and some data
+      var mockSocket  = {id: '90ej1j90e1'}
+        , channelName = "presentation_xxxx"
+        , data        = {name:"paul"};
+      // we add a socket
+      pool.addSocket(mockSocket, function(err){
+        // we simulate calling chassis.subscribe("channel",socket.id, data);
+        // We then call pool.removeSocket
+        // We check that the pubsub.unsubscribe is called as well
+        // we check that the channel's subscribers does not include socket.id                
+      })
+    });
+
+
+
+    // We need to find out what channels a socket is subscribed to
+    // We then need to cleanup the channel subscriptions, by calling
+    // pubsub.unsubscribe
+    // Ahh, the problem is that we won't have the user's data to pass to the unsubscribe,
+    // Or we pass the data that was passed for subscribe to unsubscribe.
+    // Would mean that unsubscribe works when the browser closes.
+    // This is a hack, but would work for now.
   });
 
   describe("#getSockets", function(){
