@@ -1,5 +1,7 @@
-var assert = require('assert')
-  , pool   = require('../../../lib/pool');
+var assert    = require('assert')
+  , pool      = require('../../../lib/pool')
+  , chassis   = require('../../../index')
+  , redis     = require('redis');
 
 describe("Pool", function(){
 
@@ -46,17 +48,20 @@ describe("Pool", function(){
 
     // Note - this is more of a functional test
     it("should remove the socket from all of the channels that it is subscribed to", function(done){
-      // we need a channel, a socket, and some data
       var mockSocket  = {id: '90ej1j90e1'}
         , channelName = "presentation_xxxx"
         , data        = {name:"paul"};
-      // we add a socket
       pool.addSocket(mockSocket, function(err){
-        // we simulate calling chassis.subscribe("channel",socket.id, data);
-        // We then call pool.removeSocket
-        // We check that the pubsub.unsubscribe is called as well
-        // we check that the channel's subscribers does not include socket.id                
-      })
+        chassis.pubsub.subscribe(channelName, mockSocket.id, function(err){
+          pool.removeSocket(mockSocket.id, function(err){
+            var redisClient = redis.createClient();
+            redisClient.smembers('chassis_'+channelName, function(err, members){
+              assert.deepEqual([],members);
+              done();
+            });
+          });
+        });
+      });
     });
 
   });
