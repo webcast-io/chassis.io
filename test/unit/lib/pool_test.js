@@ -59,15 +59,6 @@ describe("Pool", function(){
       })
     });
 
-
-
-    // We need to find out what channels a socket is subscribed to
-    // We then need to cleanup the channel subscriptions, by calling
-    // pubsub.unsubscribe
-    // Ahh, the problem is that we won't have the user's data to pass to the unsubscribe,
-    // Or we pass the data that was passed for subscribe to unsubscribe.
-    // Would mean that unsubscribe works when the browser closes.
-    // This is a hack, but would work for now.
   });
 
   describe("#getSockets", function(){
