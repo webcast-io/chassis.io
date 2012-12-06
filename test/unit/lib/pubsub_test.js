@@ -1,23 +1,37 @@
-var assert = require('assert')
-  , pubsub = require('../../../lib/pubsub');
+var assert        = require('assert')
+  , pubsub        = require('../../../lib/pubsub')
+  , pool          = require('../../../lib/pool')
+  , eventHandler  = require('../../../lib/eventHandler')
+  , redis         = require('redis')
+  , client        = redis.createClient()
+  , id            = '12093213890nj98d'
+  , secondId      = '12033ei12ksas1df'
+  , channelName   = "boxes"
+  , emitted       = false
+  , m1Received    = false
+  , m2Received    = false
+  , encodedData   = null;
+
+var socket        = {id: id, send: function(data){
+    m1Received = data
+  }}
+  , secondSocket  = {id: secondId, send: function(data){
+    m2Received = data
+  }};
 
 describe("pubsub", function(){
 
   before(function(done){
-    var pool          = require('../../../lib/pool')
-      , redis         = require('redis')
-      , client        = redis.createClient();
 
     client.del("chassis_"+'boxes', function(err,res){
       pool.getSockets(function(err,sockets){
         var keyLength = Object.keys(sockets).length;
+        var i = 0;
         if (keyLength == 0) return done();
         for (var socket in sockets){
           pool.removeSocket(socket, function(err){
-            // TODO - detect that this is the last 
-            // key in the object being looped through
-            console.log("removing socket",socket);
-            if (i == socket.length-1) {done()};
+            i++;
+            if (i == keyLength-1) {done()};
           });
         }
       });
@@ -26,39 +40,20 @@ describe("pubsub", function(){
   });
 
   describe("#subscribe", function(){
-    // what do we want to check?
-    // that a socket is subscribed to a given channel
-    // - the redis channel gets a subscriber (the socket id)
-    // - the socket's channels includes the channel
-    // - that the 'subscribe' event is emitted to all listeners for that event
-
-    // edge case - subscribing a socket to a channel it is already subscribed to
-
-    // what do we need?
-    // - a socket
-    // - a channel
-    // - all of the dependencies of the pubsub library
-    // - redis
-    // - pool (so we can inspect the socket)
-    // - eventHandler (so that we can listen to the subscribe event)
-
-    // how do we test it?
-    // we add a socket to the pool
-    // then we call "subscribe" on the pubsub method
-    // then we do all of our assertions.
 
     before(function(done){
-
-      var id            = '12093213890nj98d'
-        , socket        = {id: id}
-        , channelName   = "boxes"
-        , eventHandler  = require('../../../lib/eventHandler')
-        , pool          = require('../../../lib/pool');
-
+      
+      // This in itself a test of the eventEmitter, because
+      // if the event isn't emitted, then the done() function
+      // won't be called, and thus the 
+      var called = false;
       eventHandler.on('subscribe', function(channel, subscriber){
-        assert.equal(channel, channelName);
-        assert.equal(subscriber, id);
-        done();
+        if (!called) {
+          called = true;
+          assert.equal(channel, channelName);
+          assert.equal(subscriber, id);
+          done();
+        }
       });
 
       pool.addSocket(socket, function(err){
@@ -69,9 +64,6 @@ describe("pubsub", function(){
     });
     
     it("should add the channel to the socket", function(done){
-      var channelName   = "boxes"
-        , pool          = require('../../../lib/pool')
-        , id            = '12093213890nj98d';
       pool.getSocket(id, function(err, returnedSocket){
         assert.equal(returnedSocket.channels.length, 1);
         assert.equal(returnedSocket.channels[0], channelName);
@@ -80,11 +72,6 @@ describe("pubsub", function(){
     });
 
     it("should add the socket to the channel's Redis set of subscribed sockets", function(done){
-      var redis         = require('redis')
-        , client        = redis.createClient()
-        , id            = '12093213890nj98d'
-        , channelName   = "boxes";
-
       client.smembers('chassis_'+channelName, function(err, members){
         assert.equal(members.length, 1);
         assert.equal(members[0], id);
@@ -94,13 +81,44 @@ describe("pubsub", function(){
     
   });
 
-  describe("#unsubscribe", function(){
-
-  });
-
   describe("#publish", function(){
 
+    before(function(done){
+
+      pool.addSocket(socket, function(err){
+        pubsub.subscribe(channelName, socket.id, function(err){      
+          pool.addSocket(secondSocket, function(err){
+            pubsub.subscribe(channelName, secondSocket.id, function(err){
+              done();
+            });
+          });
+        });
+      });
+
+    });
+
+    it("should send the data to the subscribers of that channel", function(done){
+      var data    = {message: "Hello Mars"};
+
+      pubsub.publish(channelName, id, data, function(err){
+        // We have to delay the check by a few ms for Redis
+        // roundtrip
+        setTimeout(function(){
+          assert.equal(m1Received, m2Received);
+          assert(m1Received);
+          assert(m2Received);
+          assert.deepEqual(JSON.parse(m1Received).subscriber, id);
+          assert.deepEqual(JSON.parse(m1Received).channelName, channelName);
+          assert.deepEqual(JSON.parse(m1Received).data, data);
+          done();
+        },2);
+      });
+    });
+
   });
 
+  describe("#unsubscribe", function(){
+    
+  });
 
 });
