@@ -1,6 +1,7 @@
 // Dependencies
 var engine          = require('engine.io')
   , eventHandler    = require('./lib/eventHandler')
+  , helpers         = require('./lib/helpers')
   , message         = require('./lib/message')
   , pool            = require('./lib/pool')
   , pubsub          = require('./lib/pubsub')
@@ -54,6 +55,7 @@ var attach = function(server, cb) {
 
     });
 
+    // Standardise this to have a uniform format cb(err, thing) or cb(err);
     if (typeof cb === 'function') cb(socketServer);
 }
 
