@@ -107,9 +107,10 @@ describe("pubsub", function(){
           assert.equal(m1Received, m2Received);
           assert(m1Received);
           assert(m2Received);
-          assert.deepEqual(JSON.parse(m1Received).subscriber, id);
-          assert.deepEqual(JSON.parse(m1Received).channelName, channelName);
-          assert.deepEqual(JSON.parse(m1Received).data, data);
+          var message = JSON.parse(m1Received);
+          assert.deepEqual(message.subscriber, id);
+          assert.deepEqual(message.channelName, channelName);
+          assert.deepEqual(message.data, data);
           done();
         },2);
       });
@@ -118,7 +119,36 @@ describe("pubsub", function(){
   });
 
   describe("#unsubscribe", function(){
-    
+
+    it("should remove a subscriber from the channel", function(done){
+      m1Received = false;
+      m2Received = false;
+      var error  = new Error("Event not emitted");
+
+      eventHandler.on('unsubscribe', function(chnlName, subscriber){
+        assert.equal(chnlName, channelName);
+        assert.equal(subscriber, secondId);
+        error = null;
+      });
+
+      pubsub.unsubscribe(channelName,secondId, function(err){
+        pool.getSocket(secondId, function(err, socket){
+          assert.deepEqual(socket.channels,[]);
+          client.smembers("chassis_"+channelName, function(err,members){
+            assert.equal(members.indexOf(secondId),-1);
+            var data    = {message: "Hello Venus"};
+            pubsub.publish(channelName, id, data, function(err){
+              setTimeout(function(){
+                assert(m1Received);
+                assert(!m2Received);
+                done(error);
+              },10);
+            });
+          });
+        })        
+      });
+    });
+
   });
 
 });

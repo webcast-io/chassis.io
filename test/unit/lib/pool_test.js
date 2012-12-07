@@ -1,7 +1,8 @@
-var assert    = require('assert')
-  , pool      = require('../../../lib/pool')
-  , chassis   = require('../../../index')
-  , redis     = require('redis');
+var assert      = require('assert')
+  , pool        = require('../../../lib/pool')
+  , chassis     = require('../../../index')
+  , redis       = require('redis')
+  , redisClient = redis.createClient();
 
 describe("Pool", function(){
 
@@ -33,6 +34,12 @@ describe("Pool", function(){
 
   describe("#removeSocket", function(){
 
+    after(function(done){
+      redisClient.del('chassis_presentation_xxxx', function(err,res){
+        done();
+      });
+    });
+
     it("should remove the socket from the pool of sockets", function(done){
       var mockSocket = {id:'anotherUniqueId'};
       pool.addSocket(mockSocket, function(err){
@@ -53,13 +60,14 @@ describe("Pool", function(){
         , data        = {name:"paul"};
       pool.addSocket(mockSocket, function(err){
         chassis.pubsub.subscribe(channelName, mockSocket.id, function(err){
-          pool.removeSocket(mockSocket.id, function(err){
-            var redisClient = redis.createClient();
-            redisClient.smembers('chassis_'+channelName, function(err, members){
-              assert.deepEqual([],members);
-              done();
+
+            pool.removeSocket(mockSocket.id, function(err){
+              redisClient.smembers('chassis_'+channelName, function(err, members){              
+                assert.deepEqual([],members);
+                done();
+              });
             });
-          });
+
         });
       });
     });
