@@ -1,25 +1,22 @@
 {
-  "name": "chassis.io",
-  "version": "0.0.2",
-  "description": "A lightweight wrapper around engine.io",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name"            : "chassis.io",
+  "version"         : "0.0.2",
+  "description"     : "A lightweight wrapper around engine.io",
+  "main"            : "index.js",
+  "repository"      : {
+    "type"            : "git",
+    "url"             : "git://github.com/axisto-live/chassis.io.git"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/axm/chassis.io.git"
+  "author"          : "Paul Jensen <paul.jensen@axisto.com>",
+  "license"         : "MIT",
+  "dependencies"    : {
+    "engine.io"       : "0.3.10",
+    "redis"           : "0.8.1"
   },
-  "author": "Paul Jensen <paul.jensen@axisto.com>",
-  "license": "MIT",
-  "dependencies":{
-    "engine.io":"0.3.10",
-    "redis":"0.8.1"
+  "devDependencies" : {
+    "mocha"           : "1.6.0"
   },
-  "devDependencies":{
-    "mocha":"1.6.0"
-  },
-  "scripts":{
-    "test":"node_modules/.bin/mocha test/**/*"
+  "scripts"         : {
+    "test"            : "node_modules/.bin/mocha test/**/*"
   }
 }
