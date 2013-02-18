@@ -45,7 +45,7 @@ describe("pubsub", function(){
       
       // This in itself a test of the eventEmitter, because
       // if the event isn't emitted, then the done() function
-      // won't be called, and thus the 
+      // won't be called, and thus the test will fail
       var called = false;
       eventHandler.on('subscribe', function(channel, subscriber){
         if (!called) {
