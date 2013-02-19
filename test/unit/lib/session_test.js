@@ -46,6 +46,29 @@ describe("Session", function(){
       });
     });
 
+    it("should set a sessionId variable on the socket, so that we can disassociate it with ease", function(done){
+
+      // do the same as above, but check that socket.sessionId is equal to sessionId
+      // you'll need to use a mock socket object
+      var sessionId = "zcKXnzpqgaCdOn1oAAAA";
+      var mockSocket = {
+        id: "90ej1j90e1",
+        request: {
+          headers: {
+            cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+          }
+        },
+        transport: {}
+      };
+      pool.addSocket(mockSocket, function(err,res){
+        pool.getSocket(mockSocket.id, function(err,socket){
+          assert.equal(sessionId, socket.sessionId);
+          done();
+        });
+      });
+
+    });
+
     it("should not add the socket id to the session, if the socket id is already there");
 
   });
@@ -98,8 +121,25 @@ describe("Session", function(){
   describe("#getCurrentSocketForSession", function(){
 
     it("should fetch the latest socket for the session from the pool", function(done){
-      var mockSocket1 = {id: 'first'}
-        , mockSocket2 = {id: 'second'};
+      var mockSocket1 = {
+        id: "first",
+        request: {
+          headers: {
+            cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+          }
+        },
+        transport: {}
+      };
+
+      var mockSocket2 = {
+        id: "second",
+        request: {
+          headers: {
+            cookie: "io=zcKXnzpqgaCdOn1oAAAB; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+          }
+        },
+        transport: {}
+      };      
 
       pool.addSocket(mockSocket1, function(err){
         pool.addSocket(mockSocket2, function(err){

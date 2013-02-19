@@ -12,16 +12,35 @@ var assert        = require('assert')
   , m2Received    = false
   , encodedData   = null;
 
-var socket        = {id: id, send: function(data){
+var socket = {
+  id: id,
+  request: {
+    headers: {
+      cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+    }
+  },
+  transport: {},
+  send: function(data){
     m1Received = data
-  }}
-  , secondSocket  = {id: secondId, send: function(data){
+  }
+};
+
+var secondSocket = {
+  id: secondId,
+  request: {
+    headers: {
+      cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+    }
+  },
+  transport: {},
+  send: function(data){
     m2Received = data
-  }};
+  }
+};
 
 describe("pubsub", function(){
 
-  before(function(done){
+  beforeEach(function(done){
 
     client.del("chassis_"+'boxes', function(err,res){
       pool.getSockets(function(err,sockets){
@@ -31,12 +50,26 @@ describe("pubsub", function(){
         for (var socket in sockets){
           pool.removeSocket(socket, function(err){
             i++;
-            if (i == keyLength-1) {done()};
+            if (i == keyLength) {done()};
           });
         }
       });
     });
 
+  });
+
+  afterEach(function(done){
+    pool.getSockets(function(err,sockets){
+      var keyLength = Object.keys(sockets).length;
+      var i = 0;
+      if (keyLength == 0) return done();
+      for (var socket in sockets){
+        pool.removeSocket(socket, function(err){
+          i++;
+          if (i == keyLength) {done()};
+        });
+      }
+    });
   });
 
   describe("#subscribe", function(){
@@ -97,7 +130,7 @@ describe("pubsub", function(){
 
     });
 
-    it("should send the data to the subscribers of that channel", function(done){
+    it("should send the data to all of the subscribers of that channel", function(done){
       var data    = {message: "Hello Mars"};
 
       pubsub.publish(channelName, id, data, function(err){
@@ -112,7 +145,7 @@ describe("pubsub", function(){
           assert.deepEqual(message.channelName, channelName);
           assert.deepEqual(message.data, data);
           done();
-        },2);
+        },3);
       });
     });
 
