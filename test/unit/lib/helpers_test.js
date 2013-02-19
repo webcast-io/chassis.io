@@ -50,4 +50,49 @@ describe("Helpers", function(){
 
   });
 
+  describe("#parseCookie", function(){
+
+    it("should get the value of a cookie from the socket, from a LP connection", function(done){
+
+      var mockSocket = {
+        request: {
+          headers: {
+            cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+          }
+        },
+        transport: {}
+      };
+
+      helpers.parseCookie(mockSocket, 'io', function(err, cookieValue){
+        assert.equal(err, null);
+        assert.equal(cookieValue, 'zcKXnzpqgaCdOn1oAAAA');
+        done();
+      });
+
+    });
+
+    it("should get the value of a cookie from the socket, from a WS connection", function(done){
+
+      var mockSocket = {
+        transport: {
+          socket: {
+            upgradeReq: {
+              headers: {
+                cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+              }
+            }
+          }
+        }
+      };
+
+      helpers.parseCookie(mockSocket, 'io', function(err, cookieValue){
+        assert.equal(err, null);
+        assert.equal(cookieValue, 'zcKXnzpqgaCdOn1oAAAA');
+        done();
+      });
+
+    });
+
+  });
+
 });

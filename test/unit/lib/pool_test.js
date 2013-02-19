@@ -30,6 +30,13 @@ describe("Pool", function(){
       });      
     });
 
+    it("should associate the socket with a session");
+    // we have a session id - which matches the engine.io cookie
+    // we have a socket
+    // we add the socket to the pool
+    // we call session.getSocketsForSession
+    // we assert that the session socket ids contains the socket id
+
   });
 
   describe("#removeSocket", function(){

@@ -9,8 +9,20 @@ var engine          = require('engine.io')
 
 // This function binds engine.io to the http server,
 // and hooks up pubsub and socket pool management.
-var attach = function(server, cb) {
-    var socketServer = engine.attach(server);
+var attach = function(server, options, cb) {
+
+    // set a cookie option if one is not passed
+    if (options.server == undefined) {
+      options.server = {
+        cookie: 'io'
+      };
+    } else {
+      if (options.server.cookie == undefined) {
+        options.server.cookie = 'io';
+      }
+    }
+
+    var socketServer = engine.attach(server, options);
 
     // TODO - How do we specify the use of Redis PubSub?
 
