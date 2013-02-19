@@ -43,7 +43,7 @@ describe("pubsub", function(){
 
     before(function(done){
       
-      // This in itself a test of the eventEmitter, because
+      // This is in itself a test of the eventEmitter, because
       // if the event isn't emitted, then the done() function
       // won't be called, and thus the test will fail
       var called = false;

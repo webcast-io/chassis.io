@@ -1,5 +1,6 @@
 var assert  = require('assert')
-  , session = require('../../../lib/session');
+  , session = require('../../../lib/session')
+  , pool    = require('../../../lib/pool');
 
 
 describe("Session", function(){
@@ -28,7 +29,13 @@ describe("Session", function(){
 
   describe("#addSocketToSession", function(){
 
-    // Q - where, and how do we store this data?
+    // Q - where, and how do we store this data? - in memory for now, but the thing is
+    // say the server goes down, then comes back up. We haven't been able to trigger
+    // the 'removeSocketFromSession' function.
+
+    // However, if the session goes to the server and is new, then this isn't a worry
+    // keeping this data in memory, because the session has no associated sockets, and 
+    // will trigger the reconnection because the session-sockets is in-memory.
     it("should add the socket id to the session's list of sockets", function(done){
       session.addSocketToSession(socketId,sessionId, function(err,response){
         assert.equal(true, response);
@@ -63,6 +70,8 @@ describe("Session", function(){
       });
     });
 
+    it("should handle multiple requests to remove the same socket id from a session, just in case");
+
   });
 
   describe("#getSocketsForSession", function(){
@@ -83,5 +92,41 @@ describe("Session", function(){
     it("should remove the session id from all of it's channel subscriptions");
 
   });
+
+  // This is the magic bean function - handles engine.io's connection
+  // strategy.
+  describe("#getCurrentSocketForSession", function(){
+
+    it("should fetch the latest socket for the session from the pool", function(done){
+      var mockSocket1 = {id: 'first'}
+        , mockSocket2 = {id: 'second'};
+
+      pool.addSocket(mockSocket1, function(err){
+        pool.addSocket(mockSocket2, function(err){
+
+          session.addSocketToSession(mockSocket1.id, sessionId, function(err, res){
+
+            session.addSocketToSession(mockSocket2.id, sessionId, function(err, res){
+
+              session.getCurrentSocketForSession(sessionId, function(err,socket){
+
+                assert.equal(null, err);
+                assert.equal(mockSocket2.id, socket.id);
+                done();
+
+              });
+
+            });
+ 
+          });
+
+        });
+      });
+
+      // here's a question, doesn't pool add socket call session.addSocketToSession? 
+      // - yes, it will, once we've implemented it to work that way
+    });
+
+  });  
 
 });
