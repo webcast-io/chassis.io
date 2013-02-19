@@ -29,7 +29,7 @@ var secondSocket = {
   id: secondId,
   request: {
     headers: {
-      cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+      cookie: "io=zcKXnzpqgaCdOn1oAAAB; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
     }
   },
   transport: {},
@@ -40,7 +40,7 @@ var secondSocket = {
 
 describe("pubsub", function(){
 
-  beforeEach(function(done){
+  before(function(done){
 
     client.del("chassis_"+'boxes', function(err,res){
       pool.getSockets(function(err,sockets){
@@ -56,20 +56,6 @@ describe("pubsub", function(){
       });
     });
 
-  });
-
-  afterEach(function(done){
-    pool.getSockets(function(err,sockets){
-      var keyLength = Object.keys(sockets).length;
-      var i = 0;
-      if (keyLength == 0) return done();
-      for (var socket in sockets){
-        pool.removeSocket(socket, function(err){
-          i++;
-          if (i == keyLength) {done()};
-        });
-      }
-    });
   });
 
   describe("#subscribe", function(){
@@ -153,6 +139,20 @@ describe("pubsub", function(){
 
   describe("#unsubscribe", function(){
 
+    before(function(done){
+
+      pool.addSocket(socket, function(err){
+        pubsub.subscribe(channelName, socket.id, function(err){      
+          pool.addSocket(secondSocket, function(err){
+            pubsub.subscribe(channelName, secondSocket.id, function(err){
+              done();
+            });
+          });
+        });
+      });
+
+    });
+
     it("should remove a subscriber from the channel", function(done){
       m1Received = false;
       m2Received = false;
@@ -165,7 +165,9 @@ describe("pubsub", function(){
       });
 
       pubsub.unsubscribe(channelName,secondId, function(err){
+
         pool.getSocket(secondId, function(err, socket){
+          assert.equal(null, err);
           assert.deepEqual(socket.channels,[]);
           client.smembers("chassis_"+channelName, function(err,members){
             assert.equal(members.indexOf(secondId),-1);
