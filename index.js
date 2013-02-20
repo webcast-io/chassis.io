@@ -1,57 +1,76 @@
-// Dependencies
-var engine          = require('engine.io')
-  , eventHandler    = require('./lib/eventHandler')
-  , helpers         = require('./lib/helpers')
-  , message         = require('./lib/message')
-  , pool            = require('./lib/pool')
-  , pubsub          = require('./lib/pubsub')
-  , rfc             = require('./lib/rfc');
+var chassis = {};
+
+chassis.loadLibraries = function(){
+
+  require('./lib/eventHandler')(chassis);
+  require('./lib/helpers')(chassis);
+  require('./lib/message')(chassis);
+  require('./lib/pool')(chassis);
+  require('./lib/pubsub')(chassis);
+  require('./lib/rfc')(chassis);
+};
 
 // This function binds engine.io to the http server,
 // and hooks up pubsub and socket pool management.
-var attach = function(server, cb) {
-    var socketServer = engine.attach(server);
+chassis.attach = function(server, options, cb) {
 
-    // TODO - How do we specify the use of Redis PubSub?
+    chassis.options = options || {};
+
+    // set a cookie option if one is not passed
+    if (options.server == undefined) {
+      options.server = {
+        cookie: 'io'
+      };
+    } else {
+      if (options.server.cookie == undefined) {
+        options.server.cookie = 'io';
+      }
+    }
+
+    chassis.engine = require('engine.io');
+
+    chassis.loadLibraries();
+
+    var socketServer = chassis.engine.attach(server, chassis.options);
 
     socketServer.on('connection', function (socket) {
 
       socket.on('message', function(rocket){
-        message.decode(rocket, function(err, cargo){
+        chassis.message.decode(rocket, function(err, cargo){
           switch(cargo.action) {
             
             case 'set':
               socket.data = cargo.data;
-              eventHandler.emit('set', socket.id, cargo.data);
+              chassis.eventHandler.emit('set', socket.id, cargo.data);
               break;
 
             case 'subscribe':
-              pubsub.subscribe(cargo.channel, socket.id);
+              chassis.pubsub.subscribe(cargo.channel, socket.id);
               break;
 
             case 'unsubscribe':
-              pubsub.unsubscribe(cargo.channel, socket.id);
+              chassis.pubsub.unsubscribe(cargo.channel, socket.id);
               break;
 
             case 'publish':
-              pubsub.publish(cargo.channel, socket.id, cargo.data, function(err){
-                eventHandler.emit('publish', cargo.channel, socket.id, cargo.data);
+              chassis.pubsub.publish(cargo.channel, socket.id, cargo.data, function(err){
+                chassis.eventHandler.emit('publish', cargo.channel, socket.id, cargo.data);
               });
               break;
 
             case 'rfc':
-              rfc.executeCommand(cargo, socket);
+              chassis.rfc.executeCommand(cargo, socket);
               break;
           }
         });
       });
 
       socket.on('close', function () {
-        pool.removeSocket(socket.id);
-        eventHandler.emit('close', socket.id);
+        chassis.pool.removeSocket(socket.id);
+        chassis.eventHandler.emit('close', socket.id);
       });
 
-      pool.addSocket(socket);
+      chassis.pool.addSocket(socket);
 
     });
 
@@ -60,12 +79,4 @@ var attach = function(server, cb) {
 }
 
 // Make the libraries available 
-module.exports = {
-    attach          : attach
-  , engine          : engine
-  , eventHandler    : eventHandler
-  , message         : message
-  , pool            : pool  
-  , pubsub          : pubsub
-  , rfc             : rfc
-};
+module.exports = chassis;

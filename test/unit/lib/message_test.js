@@ -1,5 +1,7 @@
 var assert  = require('assert')
-  , message = require('../../../lib/message');
+  , chassis = require('../../../index');
+
+chassis.loadLibraries();
 
 // NOTE - Message encode/decode is basically a wrapper around
 // JSON.stringify and JSON.parse. In the future, we may change
@@ -13,7 +15,7 @@ describe("Message", function(){
 
     it("should convert the JSON payload into a string-based form for WebSocket transmission", function(done){
       var cargo = {name: "Paul"};
-      message.encode(cargo, function(err, rocket){
+      chassis.message.encode(cargo, function(err, rocket){
         assert.deepEqual  (rocket, JSON.stringify(cargo));
         done();
       });
@@ -25,7 +27,7 @@ describe("Message", function(){
 
     it("should convert the string-based message into a JSON payload", function(done){
       var rocket = JSON.stringify({name: "Paul"});
-      message.decode(rocket, function(err, cargo){
+      chassis.message.decode(rocket, function(err, cargo){
         assert.deepEqual(cargo, JSON.parse(rocket));
         done();
       });
