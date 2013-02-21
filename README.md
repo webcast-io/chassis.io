@@ -20,7 +20,7 @@ Setting up Chassis.io in your app
 
     // Use the same interface that you would with
     // attaching engine.io to your Express server.
-    var app = chassis.attach(server);
+    var app = chassis.attach(server, options);
     app.listen(3000);
 
 ```
