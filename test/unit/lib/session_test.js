@@ -58,8 +58,7 @@ describe("Session", function(){
             cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
           }
         },
-        transport: {},
-        sessionId: "zcKXnzpqgaCdOn1oAAAA"
+        transport: {}
       };
       chassis.pool.addSocket(mockSocket, function(err,res){
         chassis.pool.getSocket(mockSocket.id, function(err,socket){
