@@ -61,12 +61,13 @@ describe("Session", function(){
         transport: {}
       };
       chassis.pool.addSocket(mockSocket, function(err,res){
-        chassis.pool.getSocket(mockSocket.id, function(err,socket){
-          assert.equal(sessionId, socket.sessionId);
-          done();
+        chassis.session.addSocketToSession(mockSocket.id,sessionId, function(err,response){
+          chassis.pool.getSocket(mockSocket.id, function(err,socket){
+            assert.equal(sessionId, socket.sessionId);
+            done();
+          });
         });
       });
-
     });
 
     it("should not add the socket id to the session, if the socket id is already there");
@@ -93,7 +94,7 @@ describe("Session", function(){
       });
     });
 
-    it("should handle multiple requests to remove the same socket id from a session, just in case");
+    it("should handle multiple requests to remove the same socket id from a session, just in case")
 
   });
 
