@@ -8,6 +8,7 @@ chassis.loadLibraries = function(){
   require('./lib/pool')(chassis);
   require('./lib/pubsub')(chassis);
   require('./lib/rfc')(chassis);
+  require('./lib/session')(chassis);
 };
 
 // This function binds engine.io to the http server,
