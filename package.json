@@ -1,6 +1,6 @@
 {
   "name"            : "chassis.io",
-  "version"         : "0.0.6",
+  "version"         : "0.0.7",
   "description"     : "A lightweight wrapper around engine.io",
   "main"            : "index.js",
   "repository"      : {
