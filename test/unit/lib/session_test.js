@@ -21,7 +21,7 @@ describe('Session', function () {
         var length = sockets.length;
         for (var i =0; i<length;i++) {
           chassis.session.removeSocketFromSession(sockets[i],sessionId, function (err, response) {
-            if (i===length-1){
+            if (i === length-1) {
               done();
             }
           });
