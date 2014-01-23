@@ -3,7 +3,7 @@ Chassis.IO
 
 A lightweight wrapper around engine.io to let you add real-time features to your Express.js application.
 
-[![Build Status](https://travis-ci.org/axisto-live/chassis.io.png?branch=master)](https://travis-ci.org/webcast.io/chassis.io)
+[![Build Status](https://travis-ci.org/axisto-live/chassis.io.png?branch=master)](https://travis-ci.org/webcast-io/chassis.io)
 
 Installation
 ---
