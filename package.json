@@ -5,7 +5,7 @@
   "main"            : "index.js",
   "repository"      : {
     "type"            : "git",
-    "url"             : "git://github.com/axisto-live/chassis.io.git"
+    "url"             : "git://github.com/webcast-io/chassis.io.git"
   },
   "author"          : "Paul Jensen <paul.jensen@axisto.com>",
   "license"         : "MIT",
