@@ -1,38 +1,49 @@
-var assert        = require('assert')
-  , chassis       = require('../../../index')
-  , redis         = require('redis')
-  , client        = redis.createClient()
-  , id            = '12093213890nj98d'
-  , secondId      = '12033ei12ksas1df'
-  , channelName   = "boxes"
-  , emitted       = false
-  , m1Received    = false
-  , m2Received    = false
-  , encodedData   = null;
+'use strict';
 
-var socket        = {id: id, send: function(data){
-    m1Received = data
-  }}
-  , secondSocket  = {id: secondId, send: function(data){
-    m2Received = data
-  }};
+
+
+// Dependencies
+//
+var assert        = require('assert'),
+    chassis       = require('../../../index'),
+    redis         = require('redis'),
+    client        = redis.createClient(),
+    id            = '12093213890nj98d',
+    secondId      = '12033ei12ksas1df',
+    channelName   = 'boxes',
+    m1Received    = false,
+    m2Received    = false;
+
+var socket = {
+    id: id,
+    send: function (data) {
+      m1Received = data;
+    }
+  };
+
+var secondSocket = {
+  id: secondId,
+  send: function (data) {
+    m2Received = data;
+  }
+};
 
 chassis.loadLibraries();
 
 
-describe("pubsub", function(){
+describe('pubsub', function(){
 
-  before(function(done){
+  before(function (done) {
 
-    client.del("chassis_"+'boxes', function(err,res){
+    client.del('chassis_'+'boxes', function (err, res) {
       chassis.pool.getSockets(function(err,sockets){
         var keyLength = Object.keys(sockets).length;
         var i = 0;
-        if (keyLength == 0) return done();
+        if (keyLength === 0) return done();
         for (var socket in sockets){
-          chassis.pool.removeSocket(socket, function(err){
+          chassis.pool.removeSocket(socket, function (err) {
             i++;
-            if (i == keyLength-1) {done()};
+            if (i == keyLength-1) {done();}
           });
         }
       });
@@ -40,9 +51,9 @@ describe("pubsub", function(){
 
   });
 
-  describe("#subscribe", function(){
+  describe('#subscribe', function(){
 
-    before(function(done){
+    before(function (done) {
       
       // This in itself a test of the eventEmitter, because
       // if the event isn't emitted, then the done() function
@@ -57,14 +68,14 @@ describe("pubsub", function(){
         }
       });
 
-      chassis.pool.addSocket(socket, function(err){
-        chassis.pubsub.subscribe(channelName, socket.id, function(err){
+      chassis.pool.addSocket(socket, function (err) {
+        chassis.pubsub.subscribe(channelName, socket.id, function (err) {
         });
       });
 
     });
     
-    it("should add the channel to the socket", function(done){
+    it('should add the channel to the socket', function (done) {
       chassis.pool.getSocket(id, function(err, returnedSocket){
         assert.equal(returnedSocket.channels.length, 1);
         assert.equal(returnedSocket.channels[0], channelName);
@@ -72,8 +83,8 @@ describe("pubsub", function(){
       });
     });
 
-    it("should add the socket to the channel's Redis set of subscribed sockets", function(done){
-      client.smembers('chassis_'+channelName, function(err, members){
+    it('should add the socket to the channel\'s Redis set of subscribed sockets', function (done) {
+      client.smembers('chassis_' + channelName, function (err, members) {
         assert.equal(members.length, 1);
         assert.equal(members[0], id);
         done();
@@ -82,26 +93,24 @@ describe("pubsub", function(){
     
   });
 
-  describe("#publish", function(){
+  describe('#publish', function () {
 
-    before(function(done){
+    before(function (done) {
 
-      chassis.pool.addSocket(socket, function(err){
-        chassis.pubsub.subscribe(channelName, socket.id, function(err){      
-          chassis.pool.addSocket(secondSocket, function(err){
-            chassis.pubsub.subscribe(channelName, secondSocket.id, function(err){
-              done();
-            });
+      chassis.pool.addSocket(socket, function (err) {
+        chassis.pubsub.subscribe(channelName, socket.id, function (err) {
+          chassis.pool.addSocket(secondSocket, function (err) {
+            chassis.pubsub.subscribe(channelName, secondSocket.id, done);
           });
         });
       });
 
     });
 
-    it("should send the data to the subscribers of that channel", function(done){
-      var data    = {message: "Hello Mars"};
+    it('should send the data to the subscribers of that channel', function (done) {
+      var data    = {message: 'Hello Mars'};
 
-      chassis.pubsub.publish(channelName, id, data, function(err){
+      chassis.pubsub.publish(channelName, id, data, function (err) {
         // We have to delay the check by a few ms for Redis
         // roundtrip
         setTimeout(function(){
@@ -119,26 +128,26 @@ describe("pubsub", function(){
 
   });
 
-  describe("#unsubscribe", function(){
+  describe('#unsubscribe', function () {
 
-    it("should remove a subscriber from the channel", function(done){
+    it('should remove a subscriber from the channel', function (done) {
       m1Received = false;
       m2Received = false;
-      var error  = new Error("Event not emitted");
+      var error  = new Error('Event not emitted');
 
-      chassis.eventHandler.on('unsubscribe', function(chnlName, subscriber){
+      chassis.eventHandler.on('unsubscribe', function (chnlName, subscriber) {
         assert.equal(chnlName, channelName);
         assert.equal(subscriber, secondId);
         error = null;
       });
 
-      chassis.pubsub.unsubscribe(channelName,secondId, function(err){
-        chassis.pool.getSocket(secondId, function(err, socket){
+      chassis.pubsub.unsubscribe(channelName,secondId, function (err) {
+        chassis.pool.getSocket(secondId, function (err, socket) {
           assert.deepEqual(socket.channels,[]);
-          client.smembers("chassis_"+channelName, function(err,members){
+          client.smembers('chassis_' + channelName, function (err,members) {
             assert.equal(members.indexOf(secondId),-1);
-            var data    = {message: "Hello Venus"};
-            chassis.pubsub.publish(channelName, id, data, function(err){
+            var data = {message: 'Hello Venus'};
+            chassis.pubsub.publish(channelName, id, data, function (err) {
               setTimeout(function(){
                 assert(m1Received);
                 assert(!m2Received);
@@ -146,7 +155,7 @@ describe("pubsub", function(){
               },10);
             });
           });
-        })        
+        });
       });
     });
 

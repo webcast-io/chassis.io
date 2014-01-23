@@ -1,19 +1,27 @@
-var assert  = require('assert')
-  , chassis = require('../../../index');
+'use strict';
 
-describe("rfc", function(){
 
-  describe("#addCommand", function(){
 
-    it("should store a command locally for future reference", function(done){
+// Dependencies
+//
+var assert  = require('assert'),
+    chassis = require('../../../index');
+
+
+
+describe('rfc', function () {
+
+  describe('#addCommand', function () {
+
+    it('should store a command locally for future reference', function (done) {
       var executed = false;
-      var commando = function(data, cb){ // one of the best Arnie films ever!
+      var commando = function (data, cb) { // one of the best Arnie films ever!
         executed = true;
       };
 
       chassis.rfc.addCommand('getFilm', commando);
-      chassis.rfc.getCommands(function(err, commands){
-        assert.equal(commands['getFilm'],commando);
+      chassis.rfc.getCommands(function (err, commands) {
+        assert.equal(commands.getFilm,commando);
         done();
       });
     });
@@ -22,9 +30,9 @@ describe("rfc", function(){
 
 
 
-  describe("#executeCommand", function(){
+  describe('#executeCommand', function () {
 
-    it("should call a stored command", function(done){
+    it('should call a stored command', function (done) {
 
       var executed = false;
       var received = false;
@@ -40,10 +48,10 @@ describe("rfc", function(){
       };
 
       var mockSocket = {
-        send: function(data){
+        send: function (data) {
           received = true;
         }
-      }
+      };
 
       chassis.rfc.addCommand('getFilm', commando);
       chassis.rfc.executeCommand(cargo, mockSocket);
@@ -54,7 +62,7 @@ describe("rfc", function(){
 
     });
 
-    it("should make the socket send the result of the command's callback", function(done){
+    it('should make the socket send the result of the command\'s callback', function (done) {
 
       var theData  = null;
       var commando = function(data, cb){
@@ -71,13 +79,13 @@ describe("rfc", function(){
         send: function(data){
           theData  = data;
         }
-      }
+      };
 
       chassis.rfc.addCommand('getFilm', commando);
       chassis.rfc.executeCommand(cargo, mockSocket);
       assert.deepEqual(JSON.parse(theData).rfcUid, '1292831293');
       assert.deepEqual(JSON.parse(theData).res.year, 1985);
-      assert.deepEqual(JSON.parse(theData).res.genre, 'action');        
+      assert.deepEqual(JSON.parse(theData).res.genre, 'action');
       done();
 
     });

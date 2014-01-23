@@ -1,23 +1,29 @@
-var assert  = require('assert')
-  , chassis = require('../../../index');
+'use strict';
 
-describe("Session", function(){
 
-  var sessionId = "d29h928dh29";
-  var socketId  = "AAA8hdh92hd";
+
+// Dependencies
+//
+var assert  = require('assert'),
+    chassis = require('../../../index');
+
+describe('Session', function () {
+
+  var sessionId = 'd29h928dh29';
+  var socketId  = 'AAA8hdh92hd';
 
   beforeEach(function(done){
-    chassis.session.getSocketsForSession(sessionId, function(err,sockets){
+    chassis.session.getSocketsForSession(sessionId, function (err,sockets) {
 
-      if (sockets.length == 0) {
+      if (sockets.length === 0) {
         done();
       } else {
         var length = sockets.length;
         for (var i =0; i<length;i++) {
-          chassis.session.removeSocketFromSession(sockets[i],sessionId, function(err,response){
-            if (i==length-1){
+          chassis.session.removeSocketFromSession(sockets[i],sessionId, function (err, response) {
+            if (i===length-1){
               done();
-            };
+            }
           });
         }
       }
@@ -26,7 +32,7 @@ describe("Session", function(){
   });
 
 
-  describe("#addSocketToSession", function(){
+  describe('#addSocketToSession', function () {
 
     // Q - where, and how do we store this data? - in memory for now, but the thing is
     // say the server goes down, then comes back up. We haven't been able to trigger
@@ -36,33 +42,33 @@ describe("Session", function(){
     // keeping this data in memory, because the session has no associated sockets, and 
     // will trigger the reconnection because the session-sockets is in-memory.
 
-    it("should add the socket id to the session's list of sockets", function(done){
-      chassis.session.addSocketToSession(socketId,sessionId, function(err,response){
+    it('should add the socket id to the session\'s list of sockets', function (done) {
+      chassis.session.addSocketToSession(socketId,sessionId, function (err,response) {
         assert.equal(true, response);
-        chassis.session.getSocketsForSession(sessionId,function(err,sockets){
+        chassis.session.getSocketsForSession(sessionId,function (err,sockets) {
           assert.equal(0, sockets.indexOf(socketId));
           done();
         });
       });
     });
 
-    it("should set a sessionId variable on the socket, so that we can disassociate it with ease", function(done){
+    it('should set a sessionId variable on the socket, so that we can disassociate it with ease', function (done) {
 
       // do the same as above, but check that socket.sessionId is equal to sessionId
       // you'll need to use a mock socket object
-      var sessionId = "zcKXnzpqgaCdOn1oAAAA";
+      var sessionId = 'zcKXnzpqgaCdOn1oAAAA';
       var mockSocket = {
-        id: "90ej1j90e1",
+        id: '90ej1j90e1',
         request: {
           headers: {
-            cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+            cookie: 'io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU'
           }
         },
         transport: {}
       };
-      chassis.pool.addSocket(mockSocket, function(err,res){
-        chassis.session.addSocketToSession(mockSocket.id,sessionId, function(err,response){
-          chassis.pool.getSocket(mockSocket.id, function(err,socket){
+      chassis.pool.addSocket(mockSocket, function (err,res) {
+        chassis.session.addSocketToSession(mockSocket.id,sessionId, function (err,response) {
+          chassis.pool.getSocket(mockSocket.id, function (err,socket) {
             assert.equal(sessionId, socket.sessionId);
             done();
           });
@@ -70,13 +76,13 @@ describe("Session", function(){
       });
     });
 
-    it("should not add the socket id to the session, if the socket id is already there");
+    it('should not add the socket id to the session, if the socket id is already there');
 
   });
 
-  describe("#removeSocketFromSession", function(){
+  describe('#removeSocketFromSession', function () {
 
-    it("should remove the socket id from the session's list of sockets", function(done){
+    it('should remove the socket id from the session\'s list of sockets', function (done) {
       chassis.session.addSocketToSession(socketId,sessionId, function(err,response){
         assert.equal(null, err);
         assert.equal(true, response);
@@ -94,16 +100,16 @@ describe("Session", function(){
       });
     });
 
-    it("should handle multiple requests to remove the same socket id from a session, just in case")
+    it('should handle multiple requests to remove the same socket id from a session, just in case');
 
   });
 
-  describe("#getSocketsForSession", function(){
+  describe('#getSocketsForSession', function () {
 
-    it("should return the list of socket ids for the session", function(done){
-      chassis.session.addSocketToSession(socketId,sessionId, function(err,response){
+    it('should return the list of socket ids for the session', function (done) {
+      chassis.session.addSocketToSession(socketId,sessionId, function (err,response) {
         assert.equal(true, response);
-        chassis.session.getSocketsForSession(sessionId,function(err,sockets){
+        chassis.session.getSocketsForSession(sessionId,function (err,sockets) {
           assert.equal(0, sockets.indexOf(socketId));
           done();
         });
@@ -111,45 +117,46 @@ describe("Session", function(){
     });
   });
 
-  describe("#unsubscribeSessionFromAllChannels", function(){
+  describe('#unsubscribeSessionFromAllChannels', function () {
  
-    it("should remove the session id from all of it's channel subscriptions");
+    it('should remove the session id from all of it\'s channel subscriptions');
 
   });
 
   // This is the magic bean function - handles engine.io's connection
   // strategy.
-  describe("#getCurrentSocketForSession", function(){
+  //
+  describe('#getCurrentSocketForSession', function () {
 
-    it("should fetch the latest socket for the session from the pool", function(done){
+    it('should fetch the latest socket for the session from the pool', function (done) {
       var mockSocket1 = {
-        id: "first",
+        id: 'first',
         request: {
           headers: {
-            cookie: "io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+            cookie: 'io=zcKXnzpqgaCdOn1oAAAA; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU'
           }
         },
         transport: {}
       };
 
       var mockSocket2 = {
-        id: "second",
+        id: 'second',
         request: {
           headers: {
-            cookie: "io=zcKXnzpqgaCdOn1oAAAB; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU"
+            cookie: 'io=zcKXnzpqgaCdOn1oAAAB; __utma=79318037.648842808.1352120656.1361279916.1361285341.56; __utmc=79318037; __utmz=79318037.1352120656.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); connect.sid=oB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwUoB2jK5SrJynMymmulC7shDxQ.SR2tfe50YoqzaRPL8BTQ6PEqYmG4uMxij0f6yRpgIwU'
           }
         },
         transport: {}
-      };      
+      };
 
       
 
-      chassis.pool.addSocket(mockSocket1, function(err){
-        chassis.pool.addSocket(mockSocket2, function(err){
+      chassis.pool.addSocket(mockSocket1, function (err) {
+        chassis.pool.addSocket(mockSocket2, function (err) {
 
-          chassis.session.addSocketToSession(mockSocket1.id, sessionId, function(err, res){
+          chassis.session.addSocketToSession(mockSocket1.id, sessionId, function (err, res) {
 
-            chassis.session.addSocketToSession(mockSocket2.id, sessionId, function(err, res){
+            chassis.session.addSocketToSession(mockSocket2.id, sessionId, function (err, res) {
 
               chassis.session.getCurrentSocketForSession(sessionId, function(err,socket){
 
@@ -170,7 +177,7 @@ describe("Session", function(){
       // - yes, it will, once we've implemented it to work that way
     });
 
-  });  
+  });
 
 
 });
