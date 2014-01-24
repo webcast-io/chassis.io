@@ -1,6 +1,6 @@
 {
   "name"            : "chassis.io",
-  "version"         : "0.0.9",
+  "version"         : "0.1.0",
   "description"     : "A lightweight wrapper around engine.io",
   "main"            : "index.js",
   "repository"      : {
@@ -10,13 +10,13 @@
   "author"          : "Paul Jensen <paul.jensen@axisto.com>",
   "license"         : "MIT",
   "dependencies"    : {
-    "engine.io"       : "0.6.3",
+    "engine.io"       : "0.8.2",
     "redis"           : "0.8.4"
   },
   "devDependencies" : {
-    "mocha"           : "1.12.0"
+    "mocha"           : "1.17.1"
   },
   "scripts"         : {
     "test"            : "node_modules/.bin/mocha test/**/*"
-  } 
+  }
 }
